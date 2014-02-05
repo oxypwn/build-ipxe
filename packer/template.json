@@ -17,9 +17,6 @@
             "http_directory": ".",
             "boot_wait": "5s",
             "boot_command": [
-                "<enter><wait10><wait10>",
-                "/usr/bin/curl -O http://{{.HTTPIP}}:{{.HTTPPort}}/bootstrap.sh<enter><wait5>",
-                "/usr/bin/bash ./bootstrap.sh<enter>"
             ],
             "disk_size": 20480,
             "ssh_username": "root",

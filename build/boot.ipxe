@@ -5,7 +5,7 @@ chain https://192.168.3.3/execute/${mac:hexhyp} ||
 goto http
 
 :http
-chain http://192.168.3.3/execute/${mac:hexhyp}
+chain http://192.168.3.3/execute/${mac:hexhyp} ||
 goto solve
 
 :solve

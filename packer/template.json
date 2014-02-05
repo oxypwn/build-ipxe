@@ -51,13 +51,5 @@
             "keep_input_artifact": false,
             "output": "packer_arch_{{.Provider}}.box"
         }
-    ],
-    "provisioners": [
-      {
-        "scripts": [
-          "arks.sh"
-        ],
-        "type": "shell"
-      }
     ]
 }

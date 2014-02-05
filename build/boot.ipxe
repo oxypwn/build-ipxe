@@ -1,0 +1,13 @@
+#!ipxe
+dhcp
+
+chain https://192.168.3.3/execute/${mac:hexhyp} ||
+goto http
+
+:http
+chain http://192.168.3.3/execute/${mac:hexhyp}
+goto solve
+
+:solve
+prompt --key 0x02 --timeout 2000 Press Ctrl-B for the iPXE command line... && shell ||
+exit 0

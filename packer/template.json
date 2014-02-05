@@ -1,0 +1,62 @@
+{
+    "variables": {
+        "iso_url": "https://dl.dropboxusercontent.com/u/364276/github.com/pandrew/build-ipxe/ipxe.iso",
+        "iso_checksum": "9e04632f8adbe4835b333355a4bfdb4d",
+        "iso_checksum_type": "sha1"
+    },
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "iso_url": "{{user `iso_url`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "guest_os_type": "ArchLinux_64",
+            "headless": "false",
+            "guest_additions_mode": "disable",
+            "http_directory": ".",
+            "boot_wait": "5s",
+            "boot_command": [
+                "<enter><wait10><wait10>",
+                "/usr/bin/curl -O http://{{.HTTPIP}}:{{.HTTPPort}}/bootstrap.sh<enter><wait5>",
+                "/usr/bin/bash ./bootstrap.sh<enter>"
+            ],
+            "disk_size": 20480,
+            "ssh_username": "root",
+            "ssh_password": "vagrant",
+            "shutdown_command": "sudo halt -p"
+        },
+        {
+            "type": "vmware-iso",
+            "iso_url": "{{user `iso_url`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "headless": "false",
+            "http_directory": ".",
+            "boot_wait": "5s",
+            "boot_command": [
+                "<enter><wait10><wait10>",
+                "/usr/bin/curl -O http://{{.HTTPIP}}:{{.HTTPPort}}/bootstrap.sh<enter><wait5>",
+                "/usr/bin/bash ./bootstrap.sh<enter>"
+            ],
+            "disk_size": 20480,
+            "ssh_username": "root",
+            "ssh_password": "vagrant",
+            "shutdown_command": "sudo halt -p"
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "keep_input_artifact": false,
+            "output": "packer_arch_{{.Provider}}.box"
+        }
+    ],
+    "provisioners": [
+      {
+        "scripts": [
+          "arks.sh"
+        ],
+        "type": "shell"
+      }
+    ]
+}

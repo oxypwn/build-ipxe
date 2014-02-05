@@ -23,7 +23,10 @@
             "disk_size": 20480,
             "ssh_username": "root",
             "ssh_password": "vagrant",
-            "shutdown_command": "sudo halt -p"
+            "shutdown_command": "sudo halt -p",
+            "vboxmanage": [
+              ["modifyvm", "{{.Name}}", "--macaddress1", "000000000011"]
+              ]
         },
         {
             "type": "vmware-iso",

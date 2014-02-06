@@ -1,0 +1,55 @@
+{
+    "variables": {
+        "iso_url": "https://dl.dropboxusercontent.com/u/364276/github.com/pandrew/build-ipxe/ipxe.iso",
+        "iso_checksum": "0385b25c539b3fff78f4d94480a9dc1c",
+        "iso_checksum_type": "md5"
+    },
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "name": "build-ipxe",
+            "iso_url": "{{user `iso_url`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "guest_os_type": "ArchLinux_64",
+            "headless": "false",
+            "guest_additions_mode": "disable",
+            "http_directory": ".",
+            "boot_wait": "5s",
+            "boot_command": [
+            ],
+            "disk_size": 20480,
+            "ssh_username": "vagrant",
+            "ssh_password": "vagrant",
+            "shutdown_command": "sudo halt -p",
+            "vboxmanage": [
+              ["modifyvm", "{{.Name}}", "--macaddress1", "000000000011"]
+              ]
+        },
+        {
+            "type": "vmware-iso",
+            "iso_url": "{{user `iso_url`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "headless": "false",
+            "http_directory": ".",
+            "boot_wait": "5s",
+            "boot_command": [
+                "<enter><wait10><wait10>",
+                "/usr/bin/curl -O http://{{.HTTPIP}}:{{.HTTPPort}}/bootstrap.sh<enter><wait5>",
+                "/usr/bin/bash ./bootstrap.sh<enter>"
+            ],
+            "disk_size": 20480,
+            "ssh_username": "root",
+            "ssh_password": "vagrant",
+            "shutdown_command": "sudo halt -p"
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "keep_input_artifact": false,
+            "output": "ArchLinux_64_{{.Provider}}.box"
+        }
+    ]
+}

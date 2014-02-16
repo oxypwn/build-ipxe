@@ -1,7 +1,7 @@
 {
     "variables": {
         "iso_url": "https://dl.dropboxusercontent.com/u/364276/github.com/pandrew/build-ipxe/ipxe.iso",
-        "iso_checksum": "0385b25c539b3fff78f4d94480a9dc1c",
+        "iso_checksum": "f889ae0c122a94da1320f43111cde7fb",
         "iso_checksum_type": "md5"
     },
     "builders": [

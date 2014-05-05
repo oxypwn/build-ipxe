@@ -1,184 +1,122 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-BOX_NAME = ENV['BOX_NAME'] || "ubuntu"
-BOX_URI = ENV['BOX_URI'] || "http://files.vagrantup.com/precise64.box"
-VF_BOX_URI = ENV['BOX_URI'] || "http://files.vagrantup.com/precise64_vmware_fusion.box"
-AWS_BOX_URI = ENV['BOX_URI'] || "https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box"
-AWS_REGION = ENV['AWS_REGION'] || "us-east-1"
-AWS_AMI = ENV['AWS_AMI'] || "ami-69f5a900"
-AWS_INSTANCE_TYPE = ENV['AWS_INSTANCE_TYPE'] || 't1.micro'
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
 
-FORWARD_DOCKER_PORTS = ENV['FORWARD_DOCKER_PORTS']
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  # All Vagrant configuration is done here. The most common configuration
+  # options are documented and commented below. For a complete reference,
+  # please see the online documentation at vagrantup.com.
 
-SSH_PRIVKEY_PATH = ENV["SSH_PRIVKEY_PATH"]
+  # Every Vagrant virtual environment requires a box to build off of.
+  config.vm.box = "pandrew/ubuntu-current"
 
-# A script to upgrade from the 12.04 kernel to the raring backport kernel (3.8)
-# and install docker.
-$script = <<SCRIPT
-# The username to add to the docker group will be passed as the first argument
-# to the script.  If nothing is passed, default to "vagrant".
-user="$1"
-if [ -z "$user" ]; then
-    user=vagrant
-fi
+  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # `vagrant box outdated`. This is not recommended.
+  # config.vm.box_check_update = false
 
-# Adding an apt gpg key is idempotent.
-apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 36A1D7869245C8950F966E92D8576A8BA88D21E9
+  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing "localhost:8080" will access port 80 on the guest machine.
+  # config.vm.network "forwarded_port", guest: 80, host: 8080
 
-# Creating the docker.list file is idempotent, but it may overwrite desired
-# settings if it already exists.  This could be solved with md5sum but it
-# doesn't seem worth it.
-echo 'deb http://get.docker.io/ubuntu docker main' > \
-    /etc/apt/sources.list.d/docker.list
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
 
-# Update remote package metadata.  'apt-get update' is idempotent.
-apt-get update -q
+  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network "public_network"
 
-# Install docker.  'apt-get install' is idempotent.
-apt-get install -q -y lxc-docker
+  # If true, then any SSH connections made will enable agent forwarding.
+  # Default value: false
+  # config.ssh.forward_agent = true
 
-usermod -a -G docker "$user"
+  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder "../data", "/vagrant_data"
 
-tmp=`mktemp -q` && {
-    # Only install the backport kernel, don't bother upgrading if the backport is
-    # already installed.  We want parse the output of apt so we need to save it
-    # with 'tee'.  NOTE: The installation of the kernel will trigger dkms to
-    # install vboxguest if needed.
-    apt-get install -q -y --no-upgrade linux-image-generic-lts-raring | \
-        tee "$tmp"
+  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Don't boot with headless mode
+  #   vb.gui = true
+  #
+  #   # Use VBoxManage to customize the VM. For example to change memory:
+  #   vb.customize ["modifyvm", :id, "--memory", "1024"]
+  # end
+  #
+  # View the documentation for the provider you're using for more
+  # information on available options.
 
-    # Parse the number of installed packages from the output
-    NUM_INST=`awk '$2 == "upgraded," && $4 == "newly" { print $3 }' "$tmp"`
-    rm "$tmp"
-}
+  # Enable provisioning with CFEngine. CFEngine Community packages are
+  # automatically installed. For example, configure the host as a
+  # policy server and optionally a policy file to run:
+  #
+  # config.vm.provision "cfengine" do |cf|
+  #   cf.am_policy_hub = true
+  #   # cf.run_file = "motd.cf"
+  # end
+  #
+  # You can also configure and bootstrap a client to an existing
+  # policy server:
+  #
+  # config.vm.provision "cfengine" do |cf|
+  #   cf.policy_server_address = "10.0.2.15"
+  # end
 
-# If the number of installed packages is greater than 0, we want to reboot (the
-# backport kernel was installed but is not running).
-if [ "$NUM_INST" -gt 0 ];
-then
-    echo "Rebooting down to activate new kernel."
-    echo "/vagrant will not be mounted.  Use 'vagrant halt' followed by"
-    echo "'vagrant up' to ensure /vagrant is mounted."
-    shutdown -r now
-fi
+  # Enable provisioning with Puppet stand alone.  Puppet manifests
+  # are contained in a directory path relative to this Vagrantfile.
+  # You will need to create the manifests directory and a manifest in
+  # the file default.pp in the manifests_path directory.
+  #
+  # config.vm.provision "puppet" do |puppet|
+  #   puppet.manifests_path = "manifests"
+  #   puppet.manifest_file  = "site.pp"
+  # end
 
+  # Enable provisioning with chef solo, specifying a cookbooks path, roles
+  # path, and data_bags path (all relative to this Vagrantfile), and adding
+  # some recipes and/or roles.
+  #
+  # config.vm.provision "chef_solo" do |chef|
+  #   chef.cookbooks_path = "../my-recipes/cookbooks"
+  #   chef.roles_path = "../my-recipes/roles"
+  #   chef.data_bags_path = "../my-recipes/data_bags"
+  #   chef.add_recipe "mysql"
+  #   chef.add_role "web"
+  #
+  #   # You may also specify custom JSON attributes:
+  #   chef.json = { :mysql_password => "foo" }
+  # end
 
-
-
-apt-get -y install git-core mkisofs make syslinux
-git clone git://git.ipxe.org/ipxe.git /home/vagrant/ipxe
-
-
-SCRIPT
-
-# We need to install the virtualbox guest additions *before* we do the normal
-# docker installation.  As such this script is prepended to the common docker
-# install script above.  This allows the install of the backport kernel to
-# trigger dkms to build the virtualbox guest module install.
-$vbox_script = <<VBOX_SCRIPT + $script
-# Install the VirtualBox guest additions if they aren't already installed.
-if [ ! -d /opt/VBoxGuestAdditions-4.3.6/ ]; then
-    # Update remote package metadata.  'apt-get update' is idempotent.
-    apt-get update -q
-
-    # Kernel Headers and dkms are required to build the vbox guest kernel
-    # modules.
-    apt-get install -q -y linux-headers-generic-lts-raring dkms
-
-    echo 'Downloading VBox Guest Additions...'
-    wget -cq http://dlc.sun.com.edgesuite.net/virtualbox/4.3.6/VBoxGuestAdditions_4.3.6.iso
-    echo "95648fcdb5d028e64145a2fe2f2f28c946d219da366389295a61fed296ca79f0  VBoxGuestAdditions_4.3.6.iso" | sha256sum --check || exit 1
-
-    mount -o loop,ro /home/vagrant/VBoxGuestAdditions_4.3.6.iso /mnt
-    /mnt/VBoxLinuxAdditions.run --nox11
-    umount /mnt
-fi
-VBOX_SCRIPT
-
-Vagrant::Config.run do |config|
-  # Setup virtual machine box. This VM configuration code is always executed.
-  config.vm.box = BOX_NAME
-  config.vm.box_url = BOX_URI
-
-  # Use the specified private key path if it is specified and not empty.
-  if SSH_PRIVKEY_PATH
-      config.ssh.private_key_path = SSH_PRIVKEY_PATH
-  end
-
-  config.ssh.forward_agent = true
-end
-
-# Providers were added on Vagrant >= 1.1.0
-#
-# NOTE: The vagrant "vm.provision" appends its arguments to a list and executes
-# them in order.  If you invoke "vm.provision :shell, :inline => $script"
-# twice then vagrant will run the script two times.  Unfortunately when you use
-# providers and the override argument to set up provisioners (like the vbox
-# guest extensions) they 1) don't replace the other provisioners (they append
-# to the end of the list) and 2) you can't control the order the provisioners
-# are executed (you can only append to the list).  If you want the virtualbox
-# only script to run before the other script, you have to jump through a lot of
-# hoops.
-#
-# Here is my only repeatable solution: make one script that is common ($script)
-# and another script that is the virtual box guest *prepended* to the common
-# script.  Only ever use "vm.provision" *one time* per provider.  That means
-# every single provider has an override, and every single one configures
-# "vm.provision".  Much saddness, but such is life.
-Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
-  config.vm.provider :aws do |aws, override|
-    username = "ubuntu"
-    override.vm.box_url = AWS_BOX_URI
-    override.vm.provision :shell, :inline => $script, :args => username
-    aws.access_key_id = ENV["AWS_ACCESS_KEY"]
-    aws.secret_access_key = ENV["AWS_SECRET_KEY"]
-    aws.keypair_name = ENV["AWS_KEYPAIR_NAME"]
-    override.ssh.username = username
-    aws.region = AWS_REGION
-    aws.ami    = AWS_AMI
-    aws.instance_type = AWS_INSTANCE_TYPE
-  end
-
-  config.vm.provider :rackspace do |rs, override|
-    override.vm.provision :shell, :inline => $script
-    rs.username = ENV["RS_USERNAME"]
-    rs.api_key  = ENV["RS_API_KEY"]
-    rs.public_key_path = ENV["RS_PUBLIC_KEY"]
-    rs.flavor   = /512MB/
-    rs.image    = /Ubuntu/
-  end
-
-  config.vm.provider :vmware_fusion do |f, override|
-    override.vm.box_url = VF_BOX_URI
-    override.vm.synced_folder ".", "/vagrant", disabled: true
-    override.vm.provision :shell, :inline => $script
-    f.vmx["displayName"] = "docker"
-  end
-
-  config.vm.provider :virtualbox do |vb, override|
-    override.vm.provision :shell, :inline => $vbox_script
-    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
-  end
-end
-
-# If this is a version 1 config, virtualbox is the only option.  A version 2
-# config would have already been set in the above provider section.
-Vagrant::VERSION < "1.1.0" and Vagrant::Config.run do |config|
-  config.vm.provision :shell, :inline => $vbox_script
-end
-
-if !FORWARD_DOCKER_PORTS.nil?
-  Vagrant::VERSION < "1.1.0" and Vagrant::Config.run do |config|
-    (49000..49900).each do |port|
-      config.vm.forward_port port, port
-    end
-  end
-
-  Vagrant::VERSION >= "1.1.0" and Vagrant.configure("2") do |config|
-    (49000..49900).each do |port|
-      config.vm.network :forwarded_port, :host => port, :guest => port
-    end
-  end
+  # Enable provisioning with chef server, specifying the chef server URL,
+  # and the path to the validation key (relative to this Vagrantfile).
+  #
+  # The Opscode Platform uses HTTPS. Substitute your organization for
+  # ORGNAME in the URL and validation key.
+  #
+  # If you have your own Chef Server, use the appropriate URL, which may be
+  # HTTP instead of HTTPS depending on your configuration. Also change the
+  # validation key to validation.pem.
+  #
+  # config.vm.provision "chef_client" do |chef|
+  #   chef.chef_server_url = "https://api.opscode.com/organizations/ORGNAME"
+  #   chef.validation_key_path = "ORGNAME-validator.pem"
+  # end
+  #
+  # If you're using the Opscode platform, your validator client is
+  # ORGNAME-validator, replacing ORGNAME with your organization name.
+  #
+  # If you have your own Chef Server, the default validation client name is
+  # chef-validator, unless you changed the configuration.
+  #
+  #   chef.validation_client_name = "ORGNAME-validator"
 end

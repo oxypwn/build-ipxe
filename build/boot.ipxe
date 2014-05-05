@@ -1,11 +1,9 @@
 #!ipxe
 dhcp
 
-chain https://192.168.3.3/execute/${mac:hexhyp} ||
-goto http
-
-:http
-chain http://192.168.3.3:4321/execute/${mac:hexhyp} ||
+goto local
+:local
+chain http://pi:8080/p/pxe/ipxe/mac/${mac:hexhyp} ||
 goto solve
 
 :solve

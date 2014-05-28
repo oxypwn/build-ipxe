@@ -3,9 +3,9 @@ dhcp
 
 goto local
 :local
-chain http://pi:8080/p/pxe/ipxe/mac/${mac:hexhyp} ||
+chain http://boot.home.lan:8080/p/pxe/ipxe/mac/${mac:hexhyp} ||
 goto solve
 
 :solve
-prompt --key 0x02 --timeout 2000 Press Ctrl-B for the iPXE command line... && shell ||
+prompt --key 0x02 --timeout 10000 Press Ctrl-B for the iPXE command line... && shell ||
 exit 0

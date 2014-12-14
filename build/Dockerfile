@@ -1,4 +1,4 @@
-FROM pandrew/ubuntu-lts
+FROM ubuntu:trusty
 
 RUN apt-get -y install  gcc git-core mkisofs make syslinux
 RUN git clone https://github.com/pandrew/ipxe.git /ipxe

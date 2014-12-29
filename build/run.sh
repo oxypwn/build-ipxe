@@ -1,5 +1,10 @@
 #!/bin/bash
-cd /ipxe/src && make bin/undionly.kpxe bin/ipxe.iso EMBED=/boot.ipxe 
-cp bin/ipxe.iso /out
-cp bin/undionly.kpxe /out
-cd bin && md5sum ipxe.iso > /out/ipxe.iso.md5
+
+set -x
+sed "s,http://example.com,${URL},g" /boot.ipxe > /boot1.ipxe \
+	&& cd /ipxe/src && make bin/undionly.kpxe bin/ipxe.iso EMBED=/boot1.ipxe \
+        && cat /boot1.ipxe \
+        && cd bin && md5sum ipxe.iso
+
+# copy binary to volume
+cp /ipxe/src/bin/"$@" /data/ || echo "The binary does not exist."

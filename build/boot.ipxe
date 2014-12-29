@@ -3,7 +3,7 @@ dhcp
 
 goto local
 :local
-chain http://boot.home.lan:8080/p/pxe/preinstall/${mac:hexhyp} ||
+chain http://example.com/${mac:hexhyp} ||
 goto solve
 
 :solve

@@ -1,11 +1,12 @@
 #!ipxe
 dhcp
 
-goto local
-:local
-chain http://example.com/${mac:hexhyp} ||
-goto solve
 
-:solve
+goto boot
+:boot
+chain http://example.com/${mac:hexhyp} ||
+goto shell
+
+:shell
 prompt --key 0x02 --timeout 10000 Press Ctrl-B for the iPXE command line... && shell ||
 exit 0

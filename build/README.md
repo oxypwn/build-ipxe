@@ -9,5 +9,3 @@ network card. When failing you can press Ctrl-B to drop into a shell and fix the
 ```
 $ docker build -t build-ipxe . && docker run --rm -e URL=hello -v $PWD:/data/ build-ipxe ipxe.iso
 ```
-
-

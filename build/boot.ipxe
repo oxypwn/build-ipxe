@@ -4,7 +4,11 @@ dhcp
 
 goto boot
 :boot
-chain http://example.com/${mac:hexhyp} ||
+chain --timeout 5000 http://example.com:8080/v1/${mac:hexhyp}/preinstall ||
+goto gather
+
+:gather
+chain --timeout 5000  http://example.com:8080/v1/${mac:hexhyp}/announce ||
 goto shell
 
 :shell

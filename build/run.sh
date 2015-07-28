@@ -13,4 +13,4 @@ make bin/undionly.kpxe bin/ipxe.iso EMBED=/boot1.ipxe \
     && cd bin && md5sum ipxe.iso
 
 # copy binary to volume
-cp /ipxe/src/bin/"$@" /data/ || echo "The binary does not exist."
+cp -v /ipxe/src/bin/"$@" /data/ || echo "The binary does not exist."

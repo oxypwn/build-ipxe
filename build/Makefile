@@ -2,7 +2,7 @@
 
 
 
-
+OUT = "undionly.kpxe"
 
 all: build run
 
